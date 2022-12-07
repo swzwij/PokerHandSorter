@@ -5,53 +5,40 @@ using UnityEngine;
 
 public class HandSorter : MonoBehaviour
 {
-    public enum HandType
-    {
-        Royal_Flush,
-        Straight_Flush,
-        Four_Of_A_Kind,
-        Full_House,
-        Flush,
-        Straight,
-        Three_Of_A_Kind,
-        Two_Pair,
-        Pair,
-        High_Card,
-        NaN
-    }
+    private HandTypes _currentHandType;
 
-    [SerializeField] private List<Card> hand;
-
-    private void Start()
+    public HandTypes GetHandType(List<Card> hand)
     {
         hand = SortHand(hand);
-        print(HandChecker(hand));
-    }
+       
+        // Check for 2 identicle cards
+        bool isValid = true;
 
-    private List<Card> SortHand(List<Card> hand)
-    {
-        hand.Sort(SortByValue);
-        return hand;
-    }
+        int l = hand.Count;
+        for (int i = 0; i < l; i++)
+        {
+            Card currentCard = hand[i];
+            int duplicates = -1;
 
-    private HandType HandChecker(List<Card> hand)
-    {
-        if (RoyalFlush(hand)) return HandType.Royal_Flush;
-        else if (StraightFlush(hand)) return HandType.Straight_Flush;
-        else if (FourOfAKind(hand)) return HandType.Four_Of_A_Kind;
-        //else if (FullHouse(hand)) return HandType.Full_House;
-        else if (Flush(hand)) return HandType.Flush;
-        else if (Straight(hand)) return HandType.Straight;
-        else if (ThreeOfAKind(hand)) return HandType.Three_Of_A_Kind;
-        else if (TwoPair(hand)) return HandType.Two_Pair;
-        else if (Pair(hand)) return HandType.Pair;
-        else if (HighCard(hand)) return HandType.High_Card;
-        else return HandType.NaN;
+            for (int j = 0; j < l; j++)
+            {
+                Card comparedCard = hand[j];
+
+                if (currentCard == comparedCard) duplicates++;
+            }
+
+            if (duplicates > 0) isValid = false;
+        }
+        
+        if (!isValid) _currentHandType = HandTypes.Invalid_Hand;
+        else RoyalFlush(hand);
+
+        return _currentHandType;
     }
 
     #region HandTypeChecks
 
-    private bool RoyalFlush(List<Card> hand)
+    private void RoyalFlush(List<Card> hand)
     {
         bool isValid = true;
         string currentSuit = hand[0].suit;
@@ -71,10 +58,11 @@ public class HandSorter : MonoBehaviour
 
         if (combinedValue != 60) isValid = false;
 
-        return isValid;
+        if (isValid) _currentHandType = HandTypes.Royal_Flush;
+        else StraightFlush(hand);   
     }
 
-    private bool StraightFlush(List<Card> hand)
+    private void StraightFlush(List<Card> hand)
     {
         bool isValid = true;
         string currentSuit = hand[0].suit;
@@ -88,10 +76,11 @@ public class HandSorter : MonoBehaviour
             else isValid = false;
         }
 
-        return isValid;
+        if (isValid) _currentHandType = HandTypes.Straight_Flush;
+        else FourOfAKind(hand);
     }
 
-    private bool FourOfAKind(List<Card> hand)
+    private void FourOfAKind(List<Card> hand)
     {
         int hasPair = 0;
 
@@ -128,24 +117,26 @@ public class HandSorter : MonoBehaviour
         }
 
         bool r = hasPair == 108;
-        return r;
+        if (r) _currentHandType = HandTypes.Four_Of_A_Kind;
+        else FullHouse(hand);
     }
 
-    private bool FullHouse(List<Card> hand)
+    private void FullHouse(List<Card> hand)
     {
-        if (ThreeOfAKind(hand) && Pair(hand)) return true;
-        else return false;
+        if (false) _currentHandType = HandTypes.Full_House;
+        else Flush(hand);
     }
 
-    private bool Flush(List<Card> hand)
+    private void Flush(List<Card> hand)
     {
         string currentSuit = hand[0].suit;
 
-        if (hand[0].suit == currentSuit && hand[1].suit == currentSuit && hand[2].suit == currentSuit && hand[3].suit == currentSuit && hand[4].suit == currentSuit) return true;
-        else return false;
+        bool isValid = hand[0].suit == currentSuit && hand[1].suit == currentSuit && hand[2].suit == currentSuit && hand[3].suit == currentSuit && hand[4].suit == currentSuit;
+        if (isValid) _currentHandType = HandTypes.Flush;
+        else Straight(hand);
     }
 
-    private bool Straight(List<Card> hand)
+    private void Straight(List<Card> hand)
     {
         bool isValid = true;
 
@@ -158,10 +149,11 @@ public class HandSorter : MonoBehaviour
             else isValid = false;
         }
 
-        return isValid;
+        if (isValid) _currentHandType = HandTypes.Straight;
+        else ThreeOfAKind(hand);
     }
 
-    private bool ThreeOfAKind(List<Card> hand)
+    private void ThreeOfAKind(List<Card> hand)
     {
         int hasPair = 0;
 
@@ -190,10 +182,11 @@ public class HandSorter : MonoBehaviour
         }
 
         bool r = hasPair == 12;
-        return r;
+        if (r) _currentHandType = HandTypes.Three_Of_A_Kind;
+        else TwoPair(hand);
     }
 
-    private bool TwoPair(List<Card> hand)
+    private void TwoPair(List<Card> hand)
     {
         int hasPair =0;
 
@@ -214,10 +207,11 @@ public class HandSorter : MonoBehaviour
         }
 
         bool r = hasPair == 4;
-        return r;
+        if (r) _currentHandType = HandTypes.Two_Pair;
+        else Pair(hand);
     }
 
-    private bool Pair(List<Card> hand)
+    private void Pair(List<Card> hand)
     {
         int hasPair = 0;
 
@@ -238,21 +232,29 @@ public class HandSorter : MonoBehaviour
         }
 
         bool r = hasPair == 2;
-        return r;
+        if (r) _currentHandType = HandTypes.Pair;
+        else HighCard(hand);
     }
 
-    private bool HighCard(List<Card> hand)
+    private void HighCard(List<Card> hand)
     {
-        if (true)
-        {
-            return true;
-        }
+        if (true) _currentHandType = HandTypes.High_Card;
     }
 
     #endregion
+
+    #region Hand Sorting
+
+    private List<Card> SortHand(List<Card> hand)
+    {
+        hand.Sort(SortByValue);
+        return hand;
+    }
 
     private int SortByValue(Card a, Card b)
     {
         return a.value.CompareTo(b.value);
     }
+
+    #endregion
 }
