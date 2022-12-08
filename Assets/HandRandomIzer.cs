@@ -12,16 +12,29 @@ public class HandRandomIzer : MonoBehaviour
 
     [SerializeField] private List<HandTypes> handTypes = new List<HandTypes>();
     [SerializeField] private List<List<Card>> handList= new List<List<Card>>();
-    private List<Card> currentHand = new List<Card>();
 
     [Range(0,10)]
     [SerializeField] private int handAmount;
 
     [SerializeField] private List<HandTypes> handInfos = new List<HandTypes>();
 
+    private Dictionary<string, List<List<Card>>> handsAndTypes = new Dictionary<string, List<List<Card>>>();
+
     private void Awake()
     {
+        initDict();
         Randomize();
+        ShowCards();
+    }
+
+    private void initDict()
+    {
+        string[] handTypeNames = System.Enum.GetNames(typeof(HandTypes));
+        for (int i = 0; i < handTypeNames.Length; i++)
+        {
+            List<List<Card>> hands = new List<List<Card>>();
+            handsAndTypes.Add(handTypeNames[i], hands);
+        }
     }
 
     public void Randomize()
@@ -40,6 +53,8 @@ public class HandRandomIzer : MonoBehaviour
         // Fill amount of hands with cards
         for (int i = 0; i < handAmount; i++)
         {
+            List<Card> currentHand = new List<Card>();
+
             for (int j = 0; j < 5; j++)
             {
                 int r = UnityEngine.Random.Range(0, cards.Count);
@@ -47,12 +62,27 @@ public class HandRandomIzer : MonoBehaviour
                 usedCards.Remove(usedCards[r]);
             }
 
-            HandTypes currentType = _handSorter.GetHandType(currentHand);
+            string currentType = _handSorter.GetHandType(currentHand).ToString();
 
-            handTypes.Add(currentType);
-            handList.Add(currentHand);
+            handsAndTypes[currentType].Add(currentHand);
 
-            currentHand.Clear();
+        }
+    }
+
+    private void ShowCards()
+    {
+        string[] handTypeNames = System.Enum.GetNames(typeof(HandTypes));
+        for (int i = 0; i < handTypeNames.Length; i++)
+        {
+            var a = handTypeNames[i];
+            foreach (var item in handsAndTypes[handTypeNames[i]])
+            {
+                var b = item;
+                foreach (var card in item)
+                {
+                    print(card);
+                }
+            }
         }
     }
 }
