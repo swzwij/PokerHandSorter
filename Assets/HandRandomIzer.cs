@@ -9,16 +9,13 @@ public class HandRandomIzer : MonoBehaviour
 
     [SerializeField] private List<Card> cards = new List<Card>();
     private List<Card> usedCards = new List<Card>();
+    private Dictionary<string, List<List<Card>>> hands = new Dictionary<string, List<List<Card>>>();
 
-    [SerializeField] private List<HandTypes> handTypes = new List<HandTypes>();
-    [SerializeField] private List<List<Card>> handList= new List<List<Card>>();
+    [SerializeField] private List<GameObject> spawnPointGroups = new List<GameObject>();
 
     [Range(0,10)]
     [SerializeField] private int handAmount;
 
-    [SerializeField] private List<HandTypes> handInfos = new List<HandTypes>();
-
-    private Dictionary<string, List<List<Card>>> handsAndTypes = new Dictionary<string, List<List<Card>>>();
 
     private void Awake()
     {
@@ -33,7 +30,7 @@ public class HandRandomIzer : MonoBehaviour
         for (int i = 0; i < handTypeNames.Length; i++)
         {
             List<List<Card>> hands = new List<List<Card>>();
-            handsAndTypes.Add(handTypeNames[i], hands);
+            this.hands.Add(handTypeNames[i], hands);
         }
     }
 
@@ -64,7 +61,7 @@ public class HandRandomIzer : MonoBehaviour
 
             string currentType = _handSorter.GetHandType(currentHand).ToString();
 
-            handsAndTypes[currentType].Add(currentHand);
+            hands[currentType].Add(currentHand);
 
         }
     }
@@ -75,12 +72,15 @@ public class HandRandomIzer : MonoBehaviour
         for (int i = 0; i < handTypeNames.Length; i++)
         {
             var a = handTypeNames[i];
-            foreach (var item in handsAndTypes[handTypeNames[i]])
+            foreach (var item in hands[handTypeNames[i]])
             {
-                var b = item;
-                foreach (var card in item)
+                for (int j = 0; j < item.Count; j++)
                 {
+                    var card = item[i];
                     print(card);
+                    var obj = new GameObject(card.suit + card.value);
+                    obj.AddComponent<SpriteRenderer>();
+                    obj.GetComponent<SpriteRenderer>().sprite = card.art;
                 }
             }
         }
