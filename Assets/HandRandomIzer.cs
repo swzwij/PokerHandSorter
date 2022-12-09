@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using static UnityEditor.Progress;
 
 public class HandRandomIzer : MonoBehaviour
 {
@@ -16,6 +18,11 @@ public class HandRandomIzer : MonoBehaviour
     [Range(0,10)]
     [SerializeField] private int handAmount;
 
+    public void ReloadScene()
+    {
+        Scene scene = SceneManager.GetActiveScene(); 
+        SceneManager.LoadScene(scene.name);
+    }
 
     private void Awake()
     {
@@ -68,20 +75,29 @@ public class HandRandomIzer : MonoBehaviour
 
     private void ShowCards()
     {
+        int groupCount = 0;
         string[] handTypeNames = System.Enum.GetNames(typeof(HandTypes));
         for (int i = 0; i < handTypeNames.Length; i++)
         {
-            var a = handTypeNames[i];
-            foreach (var item in hands[handTypeNames[i]])
+            for (int k = 0; k < hands[handTypeNames[i]].Count; k++)
             {
+                var item = hands[handTypeNames[i]][k];
+                var currentGroup = spawnPointGroups[groupCount].GetComponent<SpawnpointGroup>();
+
                 for (int j = 0; j < item.Count; j++)
                 {
-                    var card = item[i];
+                    var currentPos = currentGroup.spawnPoints[j];
+                    var card = item[j];
+
                     print(card);
+
                     var obj = new GameObject(card.suit + card.value);
                     obj.AddComponent<SpriteRenderer>();
                     obj.GetComponent<SpriteRenderer>().sprite = card.art;
+                    obj.transform.position = currentPos.position;
                 }
+                groupCount++;
+
             }
         }
     }
