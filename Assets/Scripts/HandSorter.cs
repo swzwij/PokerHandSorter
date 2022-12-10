@@ -8,7 +8,13 @@ public class HandSorter : MonoBehaviour
     public HandTypes GetHandType(List<Card> hand)
     {
         hand = SortHand(hand);
-       
+
+        if (hand.Count != 5)
+        {
+            Debug.LogError("hand needs 5 cards");
+            return HandTypes.Invalid_Hand;
+        }
+
         // Check for 2 identicle cards
         bool isValid = true;
 
@@ -28,7 +34,11 @@ public class HandSorter : MonoBehaviour
             if (duplicates > 0) isValid = false;
         }
         
-        if (!isValid) _currentHandType = HandTypes.Invalid_Hand;
+        if (!isValid)
+        {
+            _currentHandType = HandTypes.Invalid_Hand;
+            Debug.LogError("2 identicle cards in hand");
+        }
         else RoyalFlush(hand);
 
         return _currentHandType;
