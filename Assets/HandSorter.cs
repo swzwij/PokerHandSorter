@@ -123,7 +123,34 @@ public class HandSorter : MonoBehaviour
 
     private void FullHouse(List<Card> hand)
     {
-        if (false) _currentHandType = HandTypes.Full_House;
+        int hasPair = 0;
+
+        int l = hand.Count;
+        for (int i = 0; i < l; i++)
+        {
+            Card currentCard = hand[i];
+
+            for (int j = 0; j < l; j++)
+            {
+                Card comparedCard = hand[j];
+
+                if (currentCard.value == comparedCard.value && currentCard != comparedCard)
+                {
+                    for (int h = 0; h < l; h++)
+                    {
+                        Card thirdCard = hand[h];
+
+                        if (thirdCard.value == comparedCard.value && thirdCard != comparedCard)
+                        {
+                            hasPair++;
+                        }
+                    }
+                }
+            }
+        }
+
+        bool r = hasPair == 14;
+        if (r) _currentHandType = HandTypes.Full_House;
         else Flush(hand);
     }
 

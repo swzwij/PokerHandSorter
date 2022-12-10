@@ -17,6 +17,8 @@ public class HandRandomIzer : MonoBehaviour
     [Range(0,10)]
     [SerializeField] private int handAmount;
 
+    [SerializeField] private bool isOn;
+
     public void ReloadScene()
     {
         Scene scene = SceneManager.GetActiveScene(); 
@@ -25,6 +27,7 @@ public class HandRandomIzer : MonoBehaviour
 
     private void Awake()
     {
+        if (!isOn) return;
         initDict();
         Randomize();
         ShowCards();
@@ -87,9 +90,6 @@ public class HandRandomIzer : MonoBehaviour
                 {
                     var currentPos = currentGroup.spawnPoints[j];
                     var card = item[j];
-
-                    print(card);
-
                     var obj = new GameObject(card.suit + card.value);
                     obj.AddComponent<SpriteRenderer>();
                     obj.GetComponent<SpriteRenderer>().sprite = card.art;
