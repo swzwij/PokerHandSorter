@@ -16,4 +16,9 @@ public class ManualHand : MonoBehaviour
     {
         print(_handSorter.GetHandType(hand));
     }
+
+    public void AddCard(string cardName)
+    {
+
+    }
 }
