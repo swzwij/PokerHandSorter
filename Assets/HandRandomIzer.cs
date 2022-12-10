@@ -1,23 +1,21 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class HandRandomIzer : MonoBehaviour
 {
-    [SerializeField] private HandSorter _handSorter;
+    private HandSorter _handSorter;
 
-    [SerializeField] private List<Card> cards = new List<Card>();
-    private List<Card> usedCards = new List<Card>();
-    private Dictionary<string, List<List<Card>>> hands = new Dictionary<string, List<List<Card>>>();
-
-    [SerializeField] private List<GameObject> spawnPointGroups = new List<GameObject>();
-
-    [Range(0,10)]
+    [Range(0, 10)]
     [SerializeField] private int handAmount;
 
-    [SerializeField] private bool isOn;
+    [SerializeField] private List<Card> cards = new List<Card>();
+    private List<Card> currentCards = new List<Card>();
+    private Dictionary<string, List<List<Card>>> hands = new Dictionary<string, List<List<Card>>>();
+
+    [Space]
+    [SerializeField] private List<GameObject> spawnPointGroups = new List<GameObject>();
 
     public void ReloadScene()
     {
@@ -27,7 +25,8 @@ public class HandRandomIzer : MonoBehaviour
 
     private void Awake()
     {
-        if (!isOn) return;
+        _handSorter = GetComponent<HandSorter>();
+
         initDict();
         Randomize();
         ShowCards();
@@ -43,17 +42,17 @@ public class HandRandomIzer : MonoBehaviour
         }
     }
 
-    public void Randomize()
+    private void Randomize()
     {
-        usedCards = cards;
+        currentCards = cards;
 
         // Shuffle deck
-        for (int i = 0; i < usedCards.Count; i++)
+        for (int i = 0; i < currentCards.Count; i++)
         {
-            Card temp = usedCards[i];
-            int randomIndex = UnityEngine.Random.Range(i, usedCards.Count);
-            usedCards[i] = usedCards[randomIndex];
-            usedCards[randomIndex] = temp;
+            Card temp = currentCards[i];
+            int randomIndex = UnityEngine.Random.Range(i, currentCards.Count);
+            currentCards[i] = currentCards[randomIndex];
+            currentCards[randomIndex] = temp;
         }
 
         // Fill amount of hands with cards
@@ -64,14 +63,13 @@ public class HandRandomIzer : MonoBehaviour
             for (int j = 0; j < 5; j++)
             {
                 int r = UnityEngine.Random.Range(0, cards.Count);
-                currentHand.Add(usedCards[r]);
-                usedCards.Remove(usedCards[r]);
+                currentHand.Add(currentCards[r]);
+                currentCards.Remove(currentCards[r]);
             }
 
             string currentType = _handSorter.GetHandType(currentHand).ToString();
 
             hands[currentType].Add(currentHand);
-
         }
     }
 
@@ -79,24 +77,27 @@ public class HandRandomIzer : MonoBehaviour
     {
         int groupCount = 0;
         string[] handTypeNames = System.Enum.GetNames(typeof(HandTypes));
+
+        // Loop through handTypes
         for (int i = 0; i < handTypeNames.Length; i++)
         {
+            // Loop through list of hands corresponding with handType
             for (int k = 0; k < hands[handTypeNames[i]].Count; k++)
             {
-                var item = hands[handTypeNames[i]][k];
-                var currentGroup = spawnPointGroups[groupCount].GetComponent<SpawnpointGroup>();
+                List<Card> item = hands[handTypeNames[i]][k];
+                SpawnpointGroup currentGroup = spawnPointGroups[groupCount].GetComponent<SpawnpointGroup>(); // todo: maybe move this code up
 
+                // Loop through each card in hand and make it visual
                 for (int j = 0; j < item.Count; j++)
                 {
-                    var currentPos = currentGroup.spawnPoints[j];
-                    var card = item[j];
-                    var obj = new GameObject(card.suit + card.value);
-                    obj.AddComponent<SpriteRenderer>();
-                    obj.GetComponent<SpriteRenderer>().sprite = card.art;
+                    Transform currentPos = currentGroup.spawnPoints[j];
+                    Card card = item[j];
+                    GameObject obj = new GameObject(card.suit + card.value);
+                    SpriteRenderer objRenderer = obj.AddComponent<SpriteRenderer>();
+                    objRenderer.sprite = card.art;
                     obj.transform.position = currentPos.position;
                 }
                 groupCount++;
-
             }
         }
     }
